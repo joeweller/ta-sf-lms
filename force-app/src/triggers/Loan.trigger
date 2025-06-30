@@ -1,14 +1,7 @@
 trigger Loan on Loan__c(after insert) {
-	LoanTriggerHandler handler = new LoanTriggerHandler();
-	handler.run(
-		Trigger.isBefore,
-		Trigger.isAfter,
-		Trigger.isInsert,
-		Trigger.isUpdate,
-		Trigger.isDelete,
-		Trigger.new,
-		Trigger.newMap,
-		Trigger.old,
-		Trigger.oldMap
-	);
+	final LoanTriggerHandler handler = new LoanTriggerHandler();
+	handler.setIsAfter(Trigger.isAfter);
+	handler.setIsInsert(Trigger.isInsert);
+	handler.isTriggerContext(true);
+	handler.run(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
 }

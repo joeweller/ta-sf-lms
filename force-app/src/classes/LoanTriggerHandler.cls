@@ -1,27 +1,27 @@
-public inherited sharing class LoanTriggerHandler {
+public inherited sharing class LoanTriggerHandler extends ATriggerHandler {
+	@TestVisible
+	private static Boolean shouldRun = true;
+
 	final List<Loan_Charge__c> loanChargesToInsert = new List<Loan_Charge__c>();
 
-	public void run(
-		final Boolean isBefore,
-		final Boolean isAfter,
-		final Boolean isInsert,
-		final Boolean isUpdate,
-		final Boolean isDelete,
-		final List<Loan__c> newList,
-		final Map<Id, Loan__c> newMap,
-		final List<Loan__c> oldList,
-		final Map<Id, Loan__c> oldMap
+	public override void run(
+		final List<SObject> newList,
+		final Map<Id, SObject> newMap,
+		final List<SObject> oldList,
+		final Map<Id, SObject> oldMap
 	) {
-		System.debug('Start run trigger');
-		if (isAfter) {
-			if (isInsert) {
-				for (Loan__c loan : newList) {
+		if (!this.shouldRun()) {
+			return;
+		}
+
+		final List<Loan__c> newLoans = (List<Loan__c>) newList;
+		if (this.isAfter) {
+			if (this.isInsert) {
+				for (Loan__c loan : newLoans) {
 					loanChargesToInsert.add(createReleaseChargeRecord(loan));
 				}
 			}
 		}
-
-		System.debug(JSON.serialize(loanChargesToInsert));
 		if (loanChargesToInsert.size() > 0) {
 			insert loanChargesToInsert;
 		}
@@ -37,5 +37,12 @@ public inherited sharing class LoanTriggerHandler {
 			Charge_Type__c = 'Release Charge',
 			Amount__c = 500.00
 		);
+	}
+
+	protected override Boolean shouldRun() {
+		if (this.isTriggerContext && !shouldRun) {
+			return false;
+		}
+		return true;
 	}
 }
