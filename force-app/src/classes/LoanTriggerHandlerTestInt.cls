@@ -1,5 +1,5 @@
 @isTest
-private class LoanTriggerTest {
+private class LoanTriggerHandlerTestInt {
 	@isTest
 	private static void shouldCreateLoanChargeOnInsert() {
 		final Date currentDate = Date.Today();
@@ -58,7 +58,7 @@ private class LoanTriggerTest {
 		return new Account(Name = 'Test Account');
 	}
 
-	private static Loan__c[] fetchLoan(final Id loanId) {
+	private static Loan__c fetchLoan(final Id loanId) {
 		return [
 			SELECT
 				Name,
@@ -69,8 +69,8 @@ private class LoanTriggerTest {
 				Date_Loan_Issued__c,
 				Term__c,
 				Total_Charges_on_the_Loan__c
-			FROM Loan_Charge__c
-			WHERE Loan__c = :loanId
+			FROM Loan__c
+			WHERE Id = :loanId
 		];
 	}
 
