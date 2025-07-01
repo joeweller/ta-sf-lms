@@ -5,16 +5,18 @@ private class LoanTriggerHandlerTest {
 		disableActiveTriggers();
 
 		final Date currentDate = Date.today();
-		final Loan__c loan = makeLoan(currentDate);
+		final Loan__c loan = LoanFixtures.createLoan(null, currentDate);
 
+		final LoanTriggerHandler handler;
+		
 		Test.startTest();
-		final LoanTriggerHandler handler = new LoanTriggerHandler();
+		handler = new LoanTriggerHandler();
 		handler.setIsAfter(true);
 		handler.setIsInsert(true);
 		handler.run(new List<Loan__c>{ loan }, null, null, null);
 		Test.stopTest();
 
-		final Loan_Charge__c[] charges = LoanFixtures.fetchLoanCharges(loan.id);
+		final Loan_Charge__c[] charges = handler.loanChargesToInsert;
 
 		Assert.areEqual(charges.size(), 1, '1 loan charge should be created');
 
@@ -37,16 +39,6 @@ private class LoanTriggerHandlerTest {
 	}
 
 	public static void disableActiveTriggers() {
-		LoanTriggerHandler.shouldRun = false;
-	}
-
-	public static Loan__c makeLoan(final Date loanIssueDate) {
-		final Account acc = LoanFixtures.createAccount();
-		insert acc;
-
-		final Loan__c loan = LoanFixtures.createLoan(acc.Id, loanIssueDate);
-		insert loan;
-
-		return loan;
+		LoanTriggerHandler.performDMLOverride = false;
 	}
 }

@@ -4,7 +4,6 @@ public with sharing abstract class ATriggerHandler {
 	protected Boolean isInsert = false;
 	protected Boolean isUpdate = false;
 	protected Boolean isDelete = false;
-	protected Boolean isTriggerContext = false;
 
 	public abstract void run(
 		final List<SObject> newList,
@@ -12,6 +11,8 @@ public with sharing abstract class ATriggerHandler {
 		final List<SObject> oldList,
 		final Map<Id, SObject> oldMap
 	);
+
+	protected abstract Boolean shouldRun();
 
 	public void setIsBefore(final Boolean value) {
 		this.isBefore = value;
@@ -32,10 +33,4 @@ public with sharing abstract class ATriggerHandler {
 	public void setIsDelete(final Boolean value) {
 		this.isDelete = value;
 	}
-
-	public void isTriggerContext(final Boolean value) {
-		this.isTriggerContext = value;
-	}
-
-	protected abstract Boolean shouldRun();
 }

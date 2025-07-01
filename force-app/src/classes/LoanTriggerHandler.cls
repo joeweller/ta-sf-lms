@@ -1,8 +1,9 @@
 public inherited sharing class LoanTriggerHandler extends ATriggerHandler {
 	@TestVisible
-	private static Boolean shouldRun = true;
+	private static Boolean performDMLOverride;
 
-	final List<Loan_Charge__c> loanChargesToInsert = new List<Loan_Charge__c>();
+	@TestVisible
+	final private List<Loan_Charge__c> loanChargesToInsert = new List<Loan_Charge__c>();
 
 	public override void run(
 		final List<SObject> newList,
@@ -10,10 +11,6 @@ public inherited sharing class LoanTriggerHandler extends ATriggerHandler {
 		final List<SObject> oldList,
 		final Map<Id, SObject> oldMap
 	) {
-		if (!this.shouldRun()) {
-			return;
-		}
-
 		final List<Loan__c> newLoans = (List<Loan__c>) newList;
 		if (this.isAfter) {
 			if (this.isInsert) {
@@ -22,9 +19,19 @@ public inherited sharing class LoanTriggerHandler extends ATriggerHandler {
 				}
 			}
 		}
-		if (loanChargesToInsert.size() > 0) {
-			insert loanChargesToInsert;
+
+		if (this.shouldRun()) {
+			if (loanChargesToInsert.size() > 0) {
+				insert loanChargesToInsert;
+			}
 		}
+	}
+
+	protected override Boolean shouldRun() {
+		if (performDMLOverride != null) {
+			return performDMLOverride;
+		}
+		return true;
 	}
 
 	private static Loan_Charge__c createReleaseChargeRecord(
@@ -37,12 +44,5 @@ public inherited sharing class LoanTriggerHandler extends ATriggerHandler {
 			Charge_Type__c = 'Release Charge',
 			Amount__c = 500.00
 		);
-	}
-
-	protected override Boolean shouldRun() {
-		if (this.isTriggerContext && !shouldRun) {
-			return false;
-		}
-		return true;
 	}
 }
