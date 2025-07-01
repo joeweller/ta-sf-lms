@@ -77,7 +77,7 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 
 	private void calculateLoanRollup(final List<Id> loanIds) {
 		final List<Loan_Charge__c> existingCharges = [
-			SELECT Id, Amount__c, Loan__c
+			SELECT Id, Amount__c, Loan__c, Loan__r.Gross_Loan_Amount__c
 			FROM Loan_Charge__c
 			WHERE Loan__c IN :loanIds
 		];
@@ -87,19 +87,17 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 		for (Loan_Charge__c existingCharge : existingCharges) {
 			final Id loanId = existingCharge.Loan__c;
 			if (results.get(loanId) == null) {
-				results.put(loanId, new LoanSummary());
+				results.put(
+					loanId,
+					new LoanSummary(existingCharge.Loan__r.Gross_Loan_Amount__c)
+				);
 			}
-			results.get(loanId).charges += existingCharge.Amount__c;
+			results.get(loanId).addCharge(existingCharge);
 		}
 
 		for (Id loanId : results.keySet()) {
 			final LoanSummary summary = results.get(loanId);
-			this.loansToUpdate.add(
-				new Loan__c(
-					Id = loanId,
-					Total_Charges_on_the_Loan__c = summary.charges
-				)
-			);
+			this.loansToUpdate.add(this.createLoanFromSummary(loanId, summary));
 		}
 	}
 
@@ -119,7 +117,29 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 		return loanIdToRecordMap;
 	}
 
+	private Loan__c createLoanFromSummary(
+		final Id loanId,
+		final LoanSummary summary
+	) {
+		return new Loan__c(
+			Id = loanId,
+			Total_Charges_on_the_Loan__c = summary.chargesTotal,
+			Balance_of_the_Loan__c = summary.grossAmount + summary.chargesTotal
+		);
+	}
+
 	private class LoanSummary {
-		public Decimal charges = 0.0;
+		public Decimal grossAmount = 0.0;
+		public Decimal chargesTotal = 0.0;
+		public Integer chargesCount = 0;
+
+		public LoanSummary(final Decimal grossLoanAmount) {
+			this.grossAmount = grossLoanAmount;
+		}
+
+		public void addCharge(final Loan_Charge__c record) {
+			this.chargesTotal += record.Amount__c;
+			this.chargesCount += 1;
+		}
 	}
 }

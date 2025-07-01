@@ -34,7 +34,7 @@ private class LoanChargeTriggerHandlerTestInt {
 	}
 
 	@IsTest
-	private static void shouldUpdateLoanChargesWhenNewLoanIsCreated() {
+	private static void shouldUpdateLoanSummaryFieldsWhenNewLoanIsCreated() {
 		final Date currentDate = Date.Today();
 
 		final Loan__c loan;
@@ -44,9 +44,14 @@ private class LoanChargeTriggerHandlerTestInt {
 
 		final Loan__c updatedLoan = LoanFixtures.fetchLoan(loan.Id);
 		Assert.areEqual(
-			500,
+			500.0,
 			updatedLoan.Total_Charges_on_the_Loan__c,
 			'loan charges should equal release charge amount'
+		);
+		Assert.areEqual(
+			1500.0,
+			updatedLoan.Balance_of_the_Loan__c,
+			'loan balance should equal total of loan gross and charges'
 		);
 	}
 
@@ -66,6 +71,11 @@ private class LoanChargeTriggerHandlerTestInt {
 		Test.stopTest();
 
 		final Loan__c updatedLoan = LoanFixtures.fetchLoan(loan.Id);
+		Assert.areEqual(
+			1550.0,
+			updatedLoan.Balance_of_the_Loan__c,
+			'loan balance should equal total of loan gross and charges'
+		);
 		Assert.areEqual(
 			550.0,
 			updatedLoan.Total_Charges_on_the_Loan__c,
@@ -97,12 +107,22 @@ private class LoanChargeTriggerHandlerTestInt {
 
 		final Loan__c updatedLoan1 = LoanFixtures.fetchLoan(loan1.Id);
 		Assert.areEqual(
+			1550.0,
+			updatedLoan1.Balance_of_the_Loan__c,
+			'loan balance should equal total of loan gross and charges'
+		);
+		Assert.areEqual(
 			550.0,
 			updatedLoan1.Total_Charges_on_the_Loan__c,
 			'loan charges should equal release charge amount'
 		);
 
 		final Loan__c updatedLoan2 = LoanFixtures.fetchLoan(loan2.Id);
+		Assert.areEqual(
+			1600.0,
+			updatedLoan2.Balance_of_the_Loan__c,
+			'loan balance should equal total of loan gross and charges'
+		);
 		Assert.areEqual(
 			600.0,
 			updatedLoan2.Total_Charges_on_the_Loan__c,
