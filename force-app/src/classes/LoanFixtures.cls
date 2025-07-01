@@ -62,4 +62,14 @@ public inherited sharing class LoanFixtures {
 			WHERE Loan__c = :loanId
 		];
 	}
+
+	@TestVisible
+	private static Loan_Charge__c fetchLoanReleaseCharge(final Id loanId) {
+		return [
+			SELECT Name, Date__c, Charge_Type__c, Amount__c, Loan__c
+			FROM Loan_Charge__c
+			WHERE Loan__c = :loanId AND Charge_Type__c = 'Release Charge'
+			LIMIT 1
+		];
+	}
 }

@@ -130,6 +130,31 @@ private class LoanChargeTriggerHandlerTestInt {
 		);
 	}
 
+	@IsTest
+	private static void shouldUpdateReleaseChargeWhenNewChargeFallsOnSameDate() {
+		final Date currentDate = Date.Today();
+
+		final Loan__c loan = createInitialLoanRecord(currentDate);
+		final Loan_Charge__c newCharge = LoanFixtures.createLoanCharge(
+			loan.Id,
+			currentDate.addMonths(36),
+			'Interest Charge',
+			50.00
+		);
+		Test.startTest();
+		insert newCharge;
+		Test.stopTest();
+
+		final Loan_Charge__c releaseCharge = LoanFixtures.fetchLoanReleaseCharge(
+			loan.Id
+		);
+		Assert.areEqual(
+			newCharge.Date__c.addMonths(1),
+			releaseCharge.Date__c,
+			'release charge should be updated to be 1 month after latest charge'
+		);
+	}
+
 	private static Loan__c createInitialLoanRecord(final Date currentDate) {
 		final Account acc = LoanFixtures.createAccount();
 		insert acc;

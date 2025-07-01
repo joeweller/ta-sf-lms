@@ -2,7 +2,11 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 	@TestVisible
 	private static Boolean performDMLOverride;
 
+	private List<Loan_Charge__c> existingChargesCache;
+	private List<Loan_Charge__c> existingReleaseChargesCache;
+
 	private List<Loan__c> loansToUpdate = new List<Loan__c>();
+	private List<Loan_Charge__c> releaseChargesToUpdate = new List<Loan_Charge__c>();
 
 	public override void run(
 		final List<SObject> newList,
@@ -14,6 +18,10 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 		Map<Id, Loan_Charge__c> newRecordsMap = (Map<Id, Loan_Charge__c>) newMap;
 		Map<Id, List<Loan_Charge__c>> loanToNewChargesMap = getLoanIdToChargeMap(
 			newRecords
+		);
+
+		this.existingChargesCache = this.getExistingReleaseCharges(
+			loanToNewChargesMap.keySet()
 		);
 
 		if (this.isBefore) {
@@ -44,18 +52,45 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 		return true;
 	}
 
+	private List<Loan_Charge__c> getAllExistingCharges() {
+		return this.existingChargesCache;
+	}
+
+	private List<Loan_Charge__c> getAllExistingReleaseCharges() {
+		if (this.existingReleaseChargesCache == null) {
+			List<Loan_Charge__c> results = new List<Loan_Charge__c>();
+			for (Loan_Charge__c charge : this.getAllExistingCharges()) {
+				if (charge.Charge_Type__c == 'Release Charge') {
+					results.add(charge);
+				}
+			}
+			this.existingReleaseChargesCache = results;
+		}
+		return this.existingReleaseChargesCache;
+	}
+
+	private List<Loan_Charge__c> getExistingReleaseCharges(
+		final Set<Id> loanIds
+	) {
+		return [
+			SELECT
+				Id,
+				Loan__c,
+				Date__c,
+				Charge_Type__c,
+				Amount__c,
+				Loan__r.Gross_Loan_Amount__c
+			FROM Loan_Charge__c
+			WHERE Loan__c IN :loanIds
+		];
+	}
+
 	private void validateUniqueReleaseCharge(
 		final Map<Id, List<Loan_Charge__c>> loanIdToRecordMap
 	) {
-		List<Loan_Charge__c> existingCharges = [
-			SELECT Id, Loan__c
-			FROM Loan_Charge__c
-			WHERE
-				Loan__c IN :loanIdToRecordMap.keySet()
-				AND Charge_Type__c = 'Release Charge'
-		];
-
-		for (Loan_Charge__c existingCharge : existingCharges) {
+		for (
+			Loan_Charge__c existingCharge : this.getAllExistingReleaseCharges()
+		) {
 			List<Loan_Charge__c> newCharges = loanIdToRecordMap.get(
 				existingCharge.Loan__c
 			);
@@ -76,15 +111,9 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 	}
 
 	private void calculateLoanRollup(final List<Id> loanIds) {
-		final List<Loan_Charge__c> existingCharges = [
-			SELECT Id, Amount__c, Loan__c, Loan__r.Gross_Loan_Amount__c
-			FROM Loan_Charge__c
-			WHERE Loan__c IN :loanIds
-		];
-
 		final Map<Id, LoanSummary> results = new Map<Id, LoanSummary>();
 
-		for (Loan_Charge__c existingCharge : existingCharges) {
+		for (Loan_Charge__c existingCharge : this.getAllExistingCharges()) {
 			final Id loanId = existingCharge.Loan__c;
 			if (results.get(loanId) == null) {
 				results.put(
