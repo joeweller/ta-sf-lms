@@ -1,18 +1,14 @@
-# Salesforce DX Project: Next Steps
+# Setup
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+- run `npm i` to initiate local dev dependencies
+- run `npm run dev:setup` to create an org and push source (assumes default dev hub is applied)
 
-## How Do You Plan to Deploy Your Changes?
+## Manual Steps
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+- As I have not included profiles, you will need to assign the following to your profile;
+  - Loan and Loan Charge Tabs
+  - Loan Management Application
+  - If not as Admin, you will need to provide permissions for OLS and FLS for the following objects; Loan and Loan Charge
 
-## Configure Your Salesforce DX Project
-
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
-
-## Read All About It
-
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+You may also need carry out the following;
+- Update Loan and Loan Charges page layouts with all of their fields

@@ -5,7 +5,9 @@
   "description": "Salesforce App",
   "scripts": {
     "lint": "eslint **/{aura,lwc}/**/*.js",
-    "scratch:create": "sf org create scratch -f config/project-scratch-def.json",
+    "scratch:create": "sf org create scratch -f config/project-scratch-def.json -d",
+    "scratch:deploy": "sf project deploy start -c",
+    "dev:setup": "npm run scratch:create && npm run scratch:deploy",
     "test": "npm run test:unit",
     "test:unit": "sfdx-lwc-jest",
     "test:unit:watch": "sfdx-lwc-jest --watch",
