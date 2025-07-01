@@ -18,6 +18,21 @@ public inherited sharing class LoanFixtures {
 	}
 
 	@TestVisible
+	private static Loan_Charge__c createLoanCharge(
+		final Id loanId,
+		final Date chargeDate,
+		final String chargeType,
+		final Decimal amount
+	) {
+		return new Loan_Charge__c(
+			Date__c = chargeDate,
+			Charge_Type__c = chargeType,
+			Amount__c = amount,
+			Loan__c = loanId
+		);
+	}
+
+	@TestVisible
 	private static Account createAccount() {
 		return new Account(Name = 'Test Account');
 	}
