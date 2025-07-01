@@ -35,12 +35,16 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 		}
 
 		if (this.isAfter) {
+			this.updateReleaseChargesBasedOnNewChargeDates(newList);
 			this.calculateLoanRollup(loanToNewChargesMap.keySet());
 		}
 
 		if (this.shouldRun()) {
-			if (loansToUpdate.size() > 0) {
-				update loansToUpdate;
+			if (this.loansToUpdate.size() > 0) {
+				update this.loansToUpdate;
+			}
+			if (this.releaseChargesToUpdate.size() > 0) {
+				update this.releaseChargesToUpdate;
 			}
 		}
 	}
@@ -67,6 +71,29 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 			this.existingReleaseChargesCache = results;
 		}
 		return this.existingReleaseChargesCache;
+	}
+
+	private void updateReleaseChargesBasedOnNewChargeDates(
+		final List<Loan_Charge__c> newCharges
+	) {
+		Map<Id, List<Loan_Charge__c>> loanToReleaseChargeMap = this.getLoanIdToChargeMap(
+			this.getAllExistingReleaseCharges()
+		);
+
+		for (Loan_Charge__c charge : newCharges) {
+			final Loan_Charge__c existingReleaseCharge = loanToReleaseChargeMap.get(
+				charge.Loan__c
+			)[0];
+
+			if (charge.Id == existingReleaseCharge.Id) {
+				continue;
+			}
+
+			if (charge.Date__c >= existingReleaseCharge.Date__c) {
+				existingReleaseCharge.Date__c = charge.Date__c.addMonths(1);
+				this.releaseChargesToUpdate.add(existingReleaseCharge);
+			}
+		}
 	}
 
 	private List<Loan_Charge__c> getExistingReleaseCharges(
