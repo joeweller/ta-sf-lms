@@ -2,7 +2,6 @@ public inherited sharing class LoanTriggerHandler extends ATriggerHandler {
 	@TestVisible
 	private static Boolean performDMLOverride;
 
-	@TestVisible
 	final private List<Loan_Charge__c> loanChargesToInsert = new List<Loan_Charge__c>();
 
 	public override void run(
