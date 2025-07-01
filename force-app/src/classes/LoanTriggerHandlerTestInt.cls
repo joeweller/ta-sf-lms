@@ -24,7 +24,7 @@ private class LoanTriggerHandlerTestInt {
 		Assert.areEqual(
 			initialCharge.Date__c,
 			currentDate.addMonths(36),
-			'Loan issue date should be the date of issue advanced by the term'
+			'Loan charge date should be the date of loan issue advanced by the term'
 		);
 		Assert.areEqual(
 			initialCharge.Charge_Type__c,
@@ -38,7 +38,7 @@ private class LoanTriggerHandlerTestInt {
 		);
 	}
 
-	private static void shouldCreateLoanChargeOnMultipleInsert() {
+	private static void shouldApplyAdminChargeWhenLoanTermIsChanged() {
 		final Date currentDate = Date.Today();
 
 		final Account acc = LoanFixtures.createAccount();
@@ -62,7 +62,7 @@ private class LoanTriggerHandlerTestInt {
 		Assert.areEqual(
 			initialCharge1.Date__c,
 			currentDate.addMonths(36),
-			'Loan issue date should be the date of issue advanced by the term'
+			'Loan charge date should be the date of loan issue advanced by the term'
 		);
 		Assert.areEqual(
 			initialCharge1.Charge_Type__c,
@@ -87,7 +87,7 @@ private class LoanTriggerHandlerTestInt {
 		Assert.areEqual(
 			initialCharge2.Date__c,
 			currentDate.addMonths(36),
-			'Loan issue date should be the date of issue advanced by the term'
+			'Loan charge date should be the date of loan issue advanced by the term'
 		);
 		Assert.areEqual(
 			initialCharge2.Charge_Type__c,
@@ -98,6 +98,53 @@ private class LoanTriggerHandlerTestInt {
 			initialCharge2.Amount__c,
 			500.00,
 			'Initial charge amount should be 500'
+		);
+	}
+
+	@isTest
+	private static void shouldCreateAdminChargeWhenLoanTermUpdated() {
+		final Date currentDate = Date.Today();
+
+		final Account acc = LoanFixtures.createAccount();
+		insert acc;
+		final Loan__c loan = LoanFixtures.createLoan(acc.id, currentDate);
+		insert loan;
+
+		Test.startTest();
+		loan.Term__c = 48;
+		update loan;
+		Test.stopTest();
+
+		Loan_Charge__c[] loanCharges = LoanFixtures.fetchLoanCharges(loan.id);
+
+		Assert.areEqual(
+			2,
+			loanCharges.size(),
+			'2 loan charges should be present'
+		);
+
+		Loan_Charge__c adminCharge;
+
+		for (Loan_Charge__c charge : loanCharges) {
+			if (charge.Charge_Type__c == 'Admin Fee') {
+				adminCharge = charge;
+			}
+		}
+
+		Assert.areEqual(
+			adminCharge.Date__c,
+			currentDate,
+			'Loan charge date should be the same as the current date'
+		);
+		Assert.areEqual(
+			adminCharge.Charge_Type__c,
+			'Admin Fee',
+			'Charge should be Admin Fee'
+		);
+		Assert.areEqual(
+			adminCharge.Amount__c,
+			300.00,
+			'Admin fee charge amount should be 500'
 		);
 	}
 }
