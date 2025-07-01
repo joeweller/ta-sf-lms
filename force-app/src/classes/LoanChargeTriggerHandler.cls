@@ -131,7 +131,6 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 	private class LoanSummary {
 		public Decimal grossAmount = 0.0;
 		public Decimal chargesTotal = 0.0;
-		public Integer chargesCount = 0;
 
 		public LoanSummary(final Decimal grossLoanAmount) {
 			this.grossAmount = grossLoanAmount;
@@ -139,7 +138,6 @@ public inherited sharing class LoanChargeTriggerHandler extends ATriggerHandler 
 
 		public void addCharge(final Loan_Charge__c record) {
 			this.chargesTotal += record.Amount__c;
-			this.chargesCount += 1;
 		}
 	}
 }
